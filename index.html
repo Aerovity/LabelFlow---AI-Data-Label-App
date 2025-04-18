@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Label Flow</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo-container">
+                <img src="logo.png" alt="Label Flow Logo" class="logo" id="logo">
+            </div>
+            <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode">
+                <i class="fas fa-moon"></i>
+            </button>
+        </header>
+
+        <main>
+            <div class="upload-container">
+                <div id="drop-area" class="drop-area">
+                    <div class="drop-area-content">
+                        <i class="fas fa-file-archive icon"></i>
+                        <h2>Upload ZIP File</h2>
+                        <p>Drag & drop your ZIP file here or</p>
+                        <label for="fileInput" class="upload-btn">Browse Files</label>
+                        <input type="file" id="fileInput" accept=".zip" hidden>
+                    </div>
+                </div>
+
+                <div id="file-info" class="file-info hidden">
+                    <div class="file-details">
+                        <i class="fas fa-file-archive file-icon"></i>
+                        <div class="file-name-container">
+                            <span id="file-name">filename.zip</span>
+                            <button id="remove-file" class="remove-btn">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="progress-container hidden" id="progress-container">
+                        <div class="progress-bar">
+                            <div class="progress" id="progress"></div>
+                        </div>
+                        <span id="progress-text">0%</span>
+                    </div>
+                    <button id="upload-btn" class="process-btn">Process File</button>
+                </div>
+
+                <div id="result-container" class="result-container hidden">
+                    <div class="result-header">
+                        <i class="fas fa-check-circle success-icon"></i>
+                        <h3>Processing Complete!</h3>
+                    </div>
+                    <p>Your file has been processed successfully.</p>
+                    <button id="download-btn" class="download-btn">
+                        <i class="fas fa-download"></i> Download Result
+                    </button>
+                    <button id="new-upload-btn" class="new-upload-btn">Process Another File</button>
+                </div>
+            </div>
+        </main>
+
+        <div id="toast" class="toast hidden">
+            <div class="toast-content">
+                <i id="toast-icon" class="fas"></i>
+                <span id="toast-message"></span>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 Label Flow. All rights reserved.</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
