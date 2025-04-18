@@ -359,6 +359,95 @@ footer {
   display: none;
 }
 
+/* Prompt input styles */
+.prompt-container {
+  margin: 20px 0;
+}
+
+.prompt-label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.prompt-input-container {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.prompt-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: var(--border-radius);
+  font-size: 14px;
+  transition: var(--transition);
+}
+
+.dark-mode .prompt-input {
+  background-color: #2a3040;
+  border-color: #444;
+  color: var(--text-color-dark);
+}
+
+.prompt-input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(91, 106, 208, 0.2);
+}
+
+.prompt-info {
+  margin-left: 10px;
+  position: relative;
+}
+
+#prompt-info-icon {
+  color: var(--primary-color);
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.prompt-tooltip {
+  position: absolute;
+  right: 0;
+  top: 25px;
+  background-color: white;
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  padding: 15px;
+  width: 250px;
+  z-index: 100;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.dark-mode .prompt-tooltip {
+  background-color: var(--card-bg-dark);
+  box-shadow: var(--box-shadow-dark);
+}
+
+.prompt-tooltip ul {
+  margin-top: 8px;
+  margin-left: 15px;
+}
+
+.prompt-tooltip li {
+  margin-bottom: 4px;
+}
+
+.prompt-used {
+  margin: 15px 0;
+  padding: 10px;
+  background-color: var(--file-info-bg);
+  border-radius: var(--border-radius);
+  font-size: 14px;
+}
+
+.dark-mode .prompt-used {
+  background-color: var(--file-info-bg-dark);
+}
+
 /* Responsive styles */
 @media (max-width: 768px) {
   .container {
@@ -403,5 +492,10 @@ footer {
   .download-btn {
     padding: 10px;
     font-size: 14px;
+  }
+  
+  .prompt-tooltip {
+    width: 200px;
+    right: -100px;
   }
 }
