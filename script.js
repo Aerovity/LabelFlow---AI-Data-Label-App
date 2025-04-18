@@ -17,13 +17,20 @@ document.addEventListener("DOMContentLoaded", () => {
   const toastMessage = document.getElementById("toast-message")
   const themeToggle = document.getElementById("theme-toggle")
   const logo = document.getElementById("logo")
+  const promptInput = document.getElementById("prompt-input")
+  const promptInfoIcon = document.getElementById("prompt-info-icon")
+  const promptTooltip = document.getElementById("prompt-tooltip")
+  const usedPrompt = document.getElementById("used-prompt")
 
-  // API endpoint (replace with your FastAPI backend URL)
+  // API endpoint (replace with your FastAPI backend URL if necessary)
   const API_URL = "http://localhost:8000/process"
 
   let selectedFile = null
-  let processedFileUrl = null
+  let currentTaskId = null
+  let statusCheckInterval = null
   let darkMode = localStorage.getItem("darkMode") === "enabled"
+  let currentPrompt = "Find all objects"
+  let processedFileUrl = null
 
   // Initialize theme
   if (darkMode) {
@@ -32,6 +39,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Theme toggle event listener
   themeToggle.addEventListener("click", toggleDarkMode)
+
+  // Prompt info tooltip
+  promptInfoIcon.addEventListener("mouseenter", () => {
+    promptTooltip.classList.remove("hidden")
+  })
+
+  promptInfoIcon.addEventListener("mouseleave", () => {
+    promptTooltip.classList.add("hidden")
+  })
 
   // Prevent default drag behaviors
   ;["dragenter", "dragover", "dragleave", "drop"].forEach((eventName) => {
@@ -103,7 +119,7 @@ document.addEventListener("DOMContentLoaded", () => {
         selectedFile = file
         displayFileInfo(file)
       } else {
-        showToast("error", "Please select a ZIP file")
+        showToast("error", "Please select a ZIP file containing images")
       }
     }
   }
@@ -127,6 +143,16 @@ document.addEventListener("DOMContentLoaded", () => {
       return
     }
 
+    // Get the prompt value
+    currentPrompt = promptInput.value.trim()
+    if (!currentPrompt) {
+      currentPrompt = "Find all objects"
+      promptInput.value = currentPrompt
+    }
+
+    // Update the used prompt text
+    usedPrompt.textContent = currentPrompt
+
     // Show progress
     progressContainer.classList.remove("hidden")
     uploadBtn.disabled = true
@@ -134,53 +160,60 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const formData = new FormData()
     formData.append("file", selectedFile)
+    formData.append("prompt", currentPrompt)
 
-    // Simulate progress (in a real app, you'd use XHR or fetch with progress events)
-    simulateProgress()
-
-    // In a real application, you would use this:
-    /*
-        fetch(API_URL, {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.blob();
-        })
-        .then(blob => {
-            processedFileUrl = URL.createObjectURL(blob);
-            showResultUI();
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            showToast('error', 'An error occurred during processing');
-            resetProgress();
-        });
-        */
-
-    // For demo purposes, we'll simulate a successful response after 3 seconds
-    setTimeout(() => {
-      // Create a dummy blob for demo purposes
-      const dummyBlob = new Blob(["dummy content"], { type: "application/zip" })
-      processedFileUrl = URL.createObjectURL(dummyBlob)
-      showResultUI()
-    }, 3000)
+    fetch(API_URL, {
+      method: 'POST',
+      body: formData
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      return response.json();
+    })
+    .then(data => {
+      currentTaskId = data.task_id;
+      
+      // Start checking status periodically
+      statusCheckInterval = setInterval(checkProcessingStatus, 2000);
+      
+      showToast('success', 'File uploaded successfully, processing started');
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      showToast('error', 'An error occurred during upload');
+      resetProgress();
+    });
   }
 
-  function simulateProgress() {
-    let width = 0
-    const interval = setInterval(() => {
-      if (width >= 100) {
-        clearInterval(interval)
-      } else {
-        width += 5
-        progressBar.style.width = width + "%"
-        progressText.textContent = width + "%"
-      }
-    }, 150)
+  function checkProcessingStatus() {
+    if (!currentTaskId) return
+
+    fetch(`http://localhost:8000/status/${currentTaskId}`)
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.status === "processing") {
+          // Update progress bar
+          const progress = data.progress || 0
+          progressBar.style.width = progress + "%"
+          progressText.textContent = progress + "%"
+        } else if (data.status === "completed") {
+          // Processing complete
+          clearInterval(statusCheckInterval)
+          progressBar.style.width = "100%"
+          progressText.textContent = "100%"
+          showResultUI()
+        } else if (data.status === "error") {
+          // Error occurred
+          clearInterval(statusCheckInterval)
+          showToast("error", data.message || "An error occurred during processing")
+          resetProgress()
+        }
+      })
+      .catch((error) => {
+        console.error("Error checking status:", error)
+      })
   }
 
   function resetProgress() {
@@ -189,6 +222,9 @@ document.addEventListener("DOMContentLoaded", () => {
     progressContainer.classList.add("hidden")
     uploadBtn.disabled = false
     uploadBtn.textContent = "Process File"
+    if (statusCheckInterval) {
+      clearInterval(statusCheckInterval)
+    }
   }
 
   function showResultUI() {
@@ -198,14 +234,12 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function downloadFile() {
-    if (processedFileUrl) {
-      const a = document.createElement("a")
-      a.href = processedFileUrl
-      a.download = "processed_" + selectedFile.name
-      document.body.appendChild(a)
-      a.click()
-      document.body.removeChild(a)
+    if (!currentTaskId) {
+      showToast("error", "No processed file available")
+      return
     }
+
+    window.location.href = `http://localhost:8000/download/${currentTaskId}`
   }
 
   function resetUI() {
@@ -213,10 +247,10 @@ document.addEventListener("DOMContentLoaded", () => {
     dropArea.classList.remove("hidden")
     resetProgress()
     selectedFile = null
+    currentTaskId = null
     fileInput.value = ""
-    if (processedFileUrl) {
-      URL.revokeObjectURL(processedFileUrl)
-      processedFileUrl = null
+    if (statusCheckInterval) {
+      clearInterval(statusCheckInterval)
     }
   }
 

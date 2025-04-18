@@ -40,6 +40,26 @@
                             </button>
                         </div>
                     </div>
+                    
+                    <div class="prompt-container">
+                        <label for="prompt-input" class="prompt-label">Detection Prompt:</label>
+                        <div class="prompt-input-container">
+                            <input type="text" id="prompt-input" class="prompt-input" placeholder="E.g., Find people, cars, dogs" value="Find all objects">
+                            <div class="prompt-info">
+                                <i class="fas fa-info-circle" id="prompt-info-icon"></i>
+                                <div class="prompt-tooltip hidden" id="prompt-tooltip">
+                                    Describe what objects you want the AI to detect in your images. 
+                                    Be specific for better results. Examples:
+                                    <ul>
+                                        <li>"Find people wearing red shirts"</li>
+                                        <li>"Detect all vehicles and traffic signs"</li>
+                                        <li>"Identify electronic devices"</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
                     <div class="progress-container hidden" id="progress-container">
                         <div class="progress-bar">
                             <div class="progress" id="progress"></div>
@@ -55,6 +75,9 @@
                         <h3>Processing Complete!</h3>
                     </div>
                     <p>Your file has been processed successfully.</p>
+                    <div class="prompt-used">
+                        <p><strong>Prompt used:</strong> <span id="used-prompt">Find all objects</span></p>
+                    </div>
                     <button id="download-btn" class="download-btn">
                         <i class="fas fa-download"></i> Download Result
                     </button>
